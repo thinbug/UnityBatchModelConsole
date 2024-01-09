@@ -1,0 +1,2 @@
+# UnityBatchModelConsole
+Unity的Batchmode模式运行的程序无窗口，这个项目是给他加上控制台窗口，并且显示gb2132中文。
