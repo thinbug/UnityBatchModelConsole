@@ -127,6 +127,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Fun.cs" />
     <Compile Include="Network\Kcp\KcpClient.cs" />
     <Compile Include="Network\Kcp\KcpServer.cs" />
     <Compile Include="Network\Kcp\KcpSocketClient.cs" />

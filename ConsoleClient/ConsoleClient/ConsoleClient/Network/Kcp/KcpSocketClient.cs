@@ -1,4 +1,5 @@
-﻿using NetLibrary;
+﻿using ConsoleClient;
+using NetLibrary;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -116,12 +117,12 @@ namespace kcp
 
 
 
-                    int cnt = udpsocket.Receive(buff,SocketFlags.None,out SocketError errorCode);
-                    if (errorCode != SocketError.Success)
-                    {
-                        Console.WriteLine("SocketError:" + errorCode.ToString());
-                        Clear();
-                    }
+                    int cnt = udpsocket.Receive(buff, (int)SocketFlags.None);//,out SocketError errorCode);
+                    //if (errorCode != SocketError.Success)
+                    //{
+                    //    Console.WriteLine("SocketError:" + errorCode.ToString());
+                    //    Clear();
+                    //}
                     //每个kcp数据需要验证
                     if (cnt > 0)
                     {
@@ -163,7 +164,7 @@ namespace kcp
             {
                 kcpClient.Destory();
                 if (IsLocal)
-                    MMCEngine.Loger.Warn("链接销毁 : " + remoteIp + "(" + remotePort + ") ");
+                    Fun.Warn("链接销毁 : " + remoteIp + "(" + remotePort + ") ");
 
                 kcpClient = null;
             }
@@ -186,7 +187,7 @@ namespace kcp
                     udpsocket.Send(buff0, 0, buff0.Length, SocketFlags.None);
                     //Console.WriteLine("发送第一次握手数据:" + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length+","+ head);
                     if (IsLocal)
-                        MMCEngine.Loger.Info("Kcp开始连接到 : "+ remoteIp+"("+remotePort+") " + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length + "," + head);
+                        Fun.Log("Kcp开始连接到 : "+ remoteIp+"("+remotePort+") " + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length + "," + head);
 
                     break;
                 case -1:
@@ -217,7 +218,7 @@ namespace kcp
                     //如果收到的心跳周期超过1个周期，那么可能掉线了。
                     //Console.WriteLine("好久没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack));
                     if(IsLocal)
-                        MMCEngine.Loger.Warn("好久没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack));
+                        Fun.Warn("好久没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack));
                     Clear();
                     return;
                 }
@@ -241,7 +242,7 @@ namespace kcp
             connectStat = 1;
             nexthearttime = DateTimeOffset.Now.ToUnixTimeSeconds() + heartTime;
             if (IsLocal)
-                MMCEngine.Loger.Info("成功连接到 [" + _conv + "] : " + remoteIp + "(" + remotePort + ") ");
+                Fun.Log("成功连接到 [" + _conv + "] : " + remoteIp + "(" + remotePort + ") ");
 
         }
 
