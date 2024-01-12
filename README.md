@@ -1,4 +1,7 @@
 # UnityBatchModelConsole
+想通过Unity的batchmode来制作服务端程序，但是没有控制台程序，本测试2个用例，个人推荐第二个网络方式查看服务端日志。
+网络模块是Kcp的，网络部分的代码参考我的另外一个kcp_demo库，可以用自己的UDP或者Tcp程序代替。
+
 
 用例1:直接在Unity中显示Console
 目录:
