@@ -10,15 +10,15 @@ namespace ConsoleClient
     {
         public static void Log(string log)
         { 
-            
+            Console.WriteLine(log);
         }
         public static void Warn(string log)
         {
-
+            Console.WriteLine(log);
         }
         public static void Error(string log)
         {
-
+            Console.WriteLine(log);
         }
     }
 }

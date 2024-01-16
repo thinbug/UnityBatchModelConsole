@@ -1,4 +1,5 @@
-﻿using System;
+﻿using kcp;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -28,6 +29,9 @@ namespace ConsoleClient
             InitializeComponent();
             string ver = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
             this.Title = appName + " - " + ver;
+
+            KcpSocketClient kcpSocketClient = new KcpSocketClient();
+            kcpSocketClient.Create("127.0.0.1", 27100);
         }
     }
 }

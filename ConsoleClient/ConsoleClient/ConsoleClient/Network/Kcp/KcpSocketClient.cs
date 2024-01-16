@@ -64,10 +64,10 @@ namespace kcp
             var remote = new IPEndPoint(IPAddress.Parse(remoteIp), remotePort);
             udpsocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             udpsocket.Blocking = false;
-            //uint IOC_IN = 0x80000000;
-            //uint IOC_VENDOR = 0x18000000;
-            //uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
-            //udpsocket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+            uint IOC_IN = 0x80000000;
+            uint IOC_VENDOR = 0x18000000;
+            uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+            udpsocket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
             udpsocket.Connect(remote);
 
             //kcpClient = new KcpClient();
@@ -116,7 +116,12 @@ namespace kcp
                     }
 
 
-
+                    //int cnt = udpsocket.Receive(buff, SocketFlags.None, out SocketError errorCode);
+                    //if (errorCode != SocketError.Success)
+                    //{
+                    //    Console.WriteLine("SocketError:" + errorCode.ToString());
+                    //    Clear();
+                    //}
                     int cnt = udpsocket.Receive(buff, (int)SocketFlags.None);//,out SocketError errorCode);
                     //if (errorCode != SocketError.Success)
                     //{
@@ -234,6 +239,9 @@ namespace kcp
         {
             lasthearttimeBack = DateTimeOffset.Now.ToUnixTimeSeconds();
             //Console.WriteLine("接收到服务端心跳回复...");
+            if (IsLocal)
+                Fun.Log("接收到服务端心跳回复..");
+
         }
 
         void ConnetOK()

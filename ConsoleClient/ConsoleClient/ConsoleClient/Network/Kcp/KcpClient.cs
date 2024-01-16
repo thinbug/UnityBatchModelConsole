@@ -87,7 +87,7 @@ namespace kcp
         int udp_output(byte* buf, int len, NetLibrary.IKCPCB* kcp, void* user)
         {
             byte[] buff = new byte[len];
-            Marshal.Copy(new IntPtr(buf), buff, 0, len);
+            Marshal.Copy(new System.IntPtr(buf), buff, 0, len);
             socketClient.output(userid, buff, len);
             //socketServer.SocketSendByte(userid, buff, len);
             //socketServer.SocketSendByte((int)user, buff, len);
