@@ -14,7 +14,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <TextBox Grid.Row="0"></TextBox>
+        <TextBox Grid.Row="0" Name="tbConsole"></TextBox>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"></ColumnDefinition>

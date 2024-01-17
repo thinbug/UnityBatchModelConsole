@@ -3,22 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace ConsoleClient
 {
+    public enum LogType
+    { 
+        Log = 1, Warn = 2, Error = 3
+    }
+    public class LogInfo
+    {
+        public int type;
+        public string log;
+    }
     internal class Fun
     {
-        public static void Log(string log)
-        { 
-            Console.WriteLine(log);
-        }
-        public static void Warn(string log)
-        {
-            Console.WriteLine(log);
-        }
-        public static void Error(string log)
-        {
-            Console.WriteLine(log);
-        }
+        
     }
 }

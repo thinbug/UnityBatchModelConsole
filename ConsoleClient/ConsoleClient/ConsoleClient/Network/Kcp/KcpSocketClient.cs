@@ -23,7 +23,7 @@ using System.Threading.Tasks;
  * 服务端再次收到后，验证没问题就发送kcp连接成功。前面的都是通过udp直接发送，这里服务器第一次kcp发送{KcpFlag.AllowConnectOK}
 */
 ///
-namespace kcp
+namespace NetLibrary
 {
     public class KcpSocketClient
     {
@@ -54,6 +54,9 @@ namespace kcp
         long lasthearttimeBack;
 
         public Action<KcpFlag,byte[], int> OnRecvAction;
+
+        public Action<int, string> OnLog;
+
         public void Create(string _ip,int _port)
         {
             remoteIp = _ip;
@@ -169,7 +172,7 @@ namespace kcp
             {
                 kcpClient.Destory();
                 if (IsLocal)
-                    Fun.Warn("链接销毁 : " + remoteIp + "(" + remotePort + ") ");
+                    OnLog?.Invoke(2, "链接销毁 : " + remoteIp + "(" + remotePort + ") .\n");
 
                 kcpClient = null;
             }
@@ -192,7 +195,7 @@ namespace kcp
                     udpsocket.Send(buff0, 0, buff0.Length, SocketFlags.None);
                     //Console.WriteLine("发送第一次握手数据:" + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length+","+ head);
                     if (IsLocal)
-                        Fun.Log("Kcp开始连接到 : "+ remoteIp+"("+remotePort+") " + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length + "," + head);
+                        OnLog?.Invoke(1, "Kcp开始连接 : " + remoteIp+"("+remotePort+") " + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length + "," + head +".\n");
 
                     break;
                 case -1:
@@ -223,7 +226,7 @@ namespace kcp
                     //如果收到的心跳周期超过1个周期，那么可能掉线了。
                     //Console.WriteLine("好久没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack));
                     if(IsLocal)
-                        Fun.Warn("好久没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack));
+                        OnLog?.Invoke(2, "好久没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack)+ "\n");
                     Clear();
                     return;
                 }
@@ -240,7 +243,7 @@ namespace kcp
             lasthearttimeBack = DateTimeOffset.Now.ToUnixTimeSeconds();
             //Console.WriteLine("接收到服务端心跳回复...");
             if (IsLocal)
-                Fun.Log("接收到服务端心跳回复..");
+                OnLog?.Invoke(1, "接收到服务端心跳回复..\n");
 
         }
 
@@ -250,7 +253,7 @@ namespace kcp
             connectStat = 1;
             nexthearttime = DateTimeOffset.Now.ToUnixTimeSeconds() + heartTime;
             if (IsLocal)
-                Fun.Log("成功连接到 [" + _conv + "] : " + remoteIp + "(" + remotePort + ") ");
+                OnLog?.Invoke(1,"成功连接到 [" + _conv + "] : " + remoteIp + "(" + remotePort + ") \n");
 
         }
 
