@@ -14,7 +14,17 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <TextBox Grid.Row="0" Name="tbConsole"></TextBox>
+        <RichTextBox  Grid.Row="0" Name="tbConsole2">
+            <FlowDocument x:Name="tbConsole">
+                <Paragraph>
+                    <Run Foreground="Blue">Hello</Run>
+                    <Bold>World!</Bold>
+                    <Run Foreground="Red">Hello2</Run>
+                    <Run>Hello3</Run>
+                </Paragraph>
+            </FlowDocument>
+        </RichTextBox>
+           
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"></ColumnDefinition>
@@ -24,7 +34,7 @@
             <Button Grid.Column="0" Width="40" FontSize="22" >⬆</Button>
             <TextBox  Grid.Column="1" FontSize="22" VerticalContentAlignment="Center"></TextBox>
             <DockPanel Grid.Column="2" Background="#FFF0F0F0" HorizontalAlignment="Right">
-                <Button Width="80" FontSize="22">发送</Button>
+                <Button Width="80" FontSize="22" Click="Button_Click">发送</Button>
                 <Button Width="80" FontSize="22">....</Button>
                 <Button Width="80" FontSize="22">清空</Button>
             </DockPanel>
