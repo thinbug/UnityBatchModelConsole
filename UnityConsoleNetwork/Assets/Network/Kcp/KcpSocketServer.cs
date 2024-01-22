@@ -54,10 +54,11 @@ namespace NetLibrary
         byte[] buff = new byte[1400];
 
         Socket udpsocket;
-        Dictionary<uint, KcpClientInfo> kcpClientDict;
+        public Dictionary<uint, KcpClientInfo> kcpClientDict;
         Dictionary<uint, KcpClientInfo> kcpClientLinking;
 
-        public Action<KcpFlag,uint, byte[] , int> OnRecvAction;
+        public Action<KcpFlag, uint, byte[], int> OnRecvAction;
+        public Action<int, string> OnLog;
 
 
         public void Create(int lisPort)
@@ -82,6 +83,7 @@ namespace NetLibrary
 
             BeginUpdate();
 
+            
 
         }
 
@@ -112,7 +114,7 @@ namespace NetLibrary
             {
                 while (true)
                 {
-                    await Task.Delay(10);
+                    
                     
                     long nowhearttime = DateTimeOffset.Now.ToUnixTimeSeconds();
 
@@ -125,6 +127,7 @@ namespace NetLibrary
                         {
                             Console.WriteLine("Link超时了需要删除:" + item.Value.conv);
                             kcpClientLinking.Remove(item.Key);
+                            break;
                         }
                     }
                     listlink.Dispose();
@@ -139,9 +142,12 @@ namespace NetLibrary
                         {
                             Console.WriteLine("超时了需要删除:"+item.Value.conv);
                             kcpClientDict.Remove(item.Key);
+                            break;
                         }
                     }
                     list.Dispose();
+
+                    await Task.Delay(10);
 
                     if (udpsocket.Available == 0)
                     {
@@ -297,13 +303,20 @@ namespace NetLibrary
             byte[] buff0 = StructConverter.Pack(parm);
             Send(info,buff0, buff0.Length);
         }
-        void Send(KcpClientInfo client, byte[] buff, int buffsize)
+        public void Send(KcpClientInfo client, byte[] buff, int buffsize)
         {
             client.kcp.SendByte(buff, buffsize);
 
             //Console.WriteLine("Kcp(" + client.conv + ") 发送数据," + "size:" + buffsize);
         }
 
+        public void SendMsg(KcpClientInfo info, object[] parm)
+        {
+            List<object> newpar = new List<object> { info.conv, info.linkrandomcode, (int)KcpFlag.MSG };
+            newpar.AddRange(parm);
+            byte[] buff0 = StructConverter.Pack(newpar.ToArray());
+            Send(info, buff0, buff0.Length);
+        }
 
         public void KcpRecvData(uint _convId, byte[] _buff, int len)
         {
@@ -339,6 +352,7 @@ namespace NetLibrary
         {
             info.hearttime = DateTimeOffset.Now.ToUnixTimeSeconds();
             //Console.WriteLine("心跳接收(" + info.conv + ") :" + info.ep.ToString());
+            OnLog?.Invoke(1, "心跳接收(" + info.conv + ") :" + info.ep.ToString());
             Send(info, new object[] { info.conv, info.linkrandomcode, (int)KcpFlag.HeartBeatBack });
         }
     }

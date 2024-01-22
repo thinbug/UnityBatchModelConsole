@@ -14,9 +14,16 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <RichTextBox  Grid.Row="0" Name="tbConsole2">
+        <RichTextBox  Grid.Row="0" Name="tbConsole2" UseLayoutRounding="False" Grid.RowSpan="6" >
+            
             <FlowDocument x:Name="tbConsole">
-                <Paragraph>
+                <Paragraph LineHeight="0.01" >
+                    <Run Foreground="Blue">Hello</Run>
+                    <Bold>World!</Bold>
+                    <Run Foreground="Red">Hello2</Run>
+                    <Run>Hello3</Run>
+                </Paragraph>
+                <Paragraph  LineHeight="0.01">
                     <Run Foreground="Blue">Hello</Run>
                     <Bold>World!</Bold>
                     <Run Foreground="Red">Hello2</Run>

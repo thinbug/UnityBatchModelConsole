@@ -1,4 +1,4 @@
-﻿using ConsoleClient;
+﻿
 using NetLibrary;
 using System;
 using System.Collections.Generic;
@@ -333,9 +333,11 @@ namespace NetLibrary
             {
                 case KcpFlag.AllowConnectOK:
                     ConnetOK();
+                    
                     break;
                 case KcpFlag.HeartBeatBack:
                     GetHeartBack();
+                    
                     break;
             }
 

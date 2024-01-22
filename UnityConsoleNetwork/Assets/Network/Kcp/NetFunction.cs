@@ -16,7 +16,6 @@ namespace NetLibrary
         AllowConnectOK = 21,        //服务端通过kcp发送连接成功，通知可以断
         HeartBeatBack = 31,         //服务端给客户返回心跳消息
         MSG = 51,         //正常消息
-
     }
 
     internal class NetFunction
