@@ -74,10 +74,10 @@ namespace NetLibrary
             var localipep = new IPEndPoint(ip, localPort);
             udpsocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             udpsocket.Blocking = false;
-            uint IOC_IN = 0x80000000;
-            uint IOC_VENDOR = 0x18000000;
-            uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
-            udpsocket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+            //uint IOC_IN = 0x80000000;
+            //uint IOC_VENDOR = 0x18000000;
+            //uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+            //udpsocket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
 
             udpsocket.Bind(localipep);
 
@@ -91,6 +91,7 @@ namespace NetLibrary
         {
             udpsocket.Close();
             udpsocket.Dispose();
+            udpsocket = null;
         }
 
 
@@ -102,6 +103,8 @@ namespace NetLibrary
                 Console.WriteLine("找不到发送对象:" + _convId + "," + _convId + ",len:" + len);
                 return;
             }
+            if(udpsocket == null)
+                return;
             udpsocket.SendTo(_buff, 0, len, SocketFlags.None, kcpinfo.ep);
 
             //Console.WriteLine("socket发送:" + _convId);
@@ -148,14 +151,21 @@ namespace NetLibrary
                     list.Dispose();
 
                     await Task.Delay(10);
-
+                    if (udpsocket == null)
+                        break;
                     if (udpsocket.Available == 0)
                     {
                         continue;
                     }
-
-
-                    int cnt = udpsocket.ReceiveFrom(buff, ref ipep);
+                    int cnt = 0;
+                    try
+                    {
+                        cnt = udpsocket.ReceiveFrom(buff, ref ipep);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                    }
                     //每个kcp数据需要验证
                     //string ip = ((IPEndPoint)ipep).Address.ToString();
                     //int port = ((IPEndPoint)ipep).Port;

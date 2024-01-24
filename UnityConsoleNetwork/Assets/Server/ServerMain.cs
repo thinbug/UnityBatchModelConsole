@@ -2,6 +2,7 @@ using NetLibrary;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class ServerMain : MonoBehaviour
@@ -10,6 +11,9 @@ public class ServerMain : MonoBehaviour
     KcpSocketServer kcpserver;
     private void Awake()
     {
+#if UNITY_EDITOR
+        EditorApplication.quitting += EditorApplication_quitting;
+#endif
         inst = this;
         kcpserver = new KcpSocketServer();
         kcpserver.Create(27100);
@@ -19,7 +23,26 @@ public class ServerMain : MonoBehaviour
 
         Debug.Log("¿ªÊ¼");
     }
-  
+
+    private void EditorApplication_quitting()
+    {
+        Clear();
+    }
+
+    void Clear()
+    {
+        Debug.Log("½áÊø");
+        if (kcpserver != null)
+            kcpserver.Close();
+    }
+
+    
+    private void OnApplicationQuit()
+    {
+        Clear();
+    }
+
+
 
     private void OnKcpLog(int arg1, string arg2)
     {

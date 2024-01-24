@@ -54,10 +54,11 @@ namespace NetLibrary
         byte[] buff = new byte[1400];
 
         Socket udpsocket;
-        Dictionary<uint, KcpClientInfo> kcpClientDict;
+        public Dictionary<uint, KcpClientInfo> kcpClientDict;
         Dictionary<uint, KcpClientInfo> kcpClientLinking;
 
-        public Action<KcpFlag,uint, byte[] , int> OnRecvAction;
+        public Action<KcpFlag, uint, byte[], int> OnRecvAction;
+        public Action<int, string> OnLog;
 
 
         public void Create(int lisPort)
@@ -67,20 +68,21 @@ namespace NetLibrary
             kcpClientLinking = new Dictionary<uint, KcpClientInfo>();
             localPort = lisPort;
             IPAddress ip = IPAddress.Any;
-            if(!string.IsNullOrEmpty(localIp))
+            if (!string.IsNullOrEmpty(localIp))
                 ip = IPAddress.Parse(localIp);
 
             var localipep = new IPEndPoint(ip, localPort);
             udpsocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             udpsocket.Blocking = false;
-            uint IOC_IN = 0x80000000;
-            uint IOC_VENDOR = 0x18000000;
-            uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
-            udpsocket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+            //uint IOC_IN = 0x80000000;
+            //uint IOC_VENDOR = 0x18000000;
+            //uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+            //udpsocket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
 
             udpsocket.Bind(localipep);
 
             BeginUpdate();
+
 
 
         }
@@ -89,6 +91,7 @@ namespace NetLibrary
         {
             udpsocket.Close();
             udpsocket.Dispose();
+            udpsocket = null;
         }
 
 
@@ -100,6 +103,8 @@ namespace NetLibrary
                 Console.WriteLine("找不到发送对象:" + _convId + "," + _convId + ",len:" + len);
                 return;
             }
+            if (udpsocket == null)
+                return;
             udpsocket.SendTo(_buff, 0, len, SocketFlags.None, kcpinfo.ep);
 
             //Console.WriteLine("socket发送:" + _convId);
@@ -112,8 +117,8 @@ namespace NetLibrary
             {
                 while (true)
                 {
-                    await Task.Delay(10);
-                    
+
+
                     long nowhearttime = DateTimeOffset.Now.ToUnixTimeSeconds();
 
                     //链接超时
@@ -125,6 +130,7 @@ namespace NetLibrary
                         {
                             Console.WriteLine("Link超时了需要删除:" + item.Value.conv);
                             kcpClientLinking.Remove(item.Key);
+                            break;
                         }
                     }
                     listlink.Dispose();
@@ -137,19 +143,29 @@ namespace NetLibrary
 
                         if (nowhearttime - item.Value.hearttime > TimeOutHeart)
                         {
-                            Console.WriteLine("超时了需要删除:"+item.Value.conv);
+                            Console.WriteLine("超时了需要删除:" + item.Value.conv);
                             kcpClientDict.Remove(item.Key);
+                            break;
                         }
                     }
                     list.Dispose();
 
+                    await Task.Delay(10);
+                    if (udpsocket == null)
+                        break;
                     if (udpsocket.Available == 0)
                     {
                         continue;
                     }
-
-
-                    int cnt = udpsocket.ReceiveFrom(buff, ref ipep);
+                    int cnt = 0;
+                    try
+                    {
+                        cnt = udpsocket.ReceiveFrom(buff, ref ipep);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                    }
                     //每个kcp数据需要验证
                     //string ip = ((IPEndPoint)ipep).Address.ToString();
                     //int port = ((IPEndPoint)ipep).Port;
@@ -292,18 +308,25 @@ namespace NetLibrary
 
         }
 
-        void Send(KcpClientInfo info,object[] parm)
+        void Send(KcpClientInfo info, object[] parm)
         {
             byte[] buff0 = StructConverter.Pack(parm);
-            Send(info,buff0, buff0.Length);
+            Send(info, buff0, buff0.Length);
         }
-        void Send(KcpClientInfo client, byte[] buff, int buffsize)
+        public void Send(KcpClientInfo client, byte[] buff, int buffsize)
         {
             client.kcp.SendByte(buff, buffsize);
 
             //Console.WriteLine("Kcp(" + client.conv + ") 发送数据," + "size:" + buffsize);
         }
 
+        public void SendMsg(KcpClientInfo info, object[] parm)
+        {
+            List<object> newpar = new List<object> { info.conv, info.linkrandomcode, (int)KcpFlag.MSG };
+            newpar.AddRange(parm);
+            byte[] buff0 = StructConverter.Pack(newpar.ToArray());
+            Send(info, buff0, buff0.Length);
+        }
 
         public void KcpRecvData(uint _convId, byte[] _buff, int len)
         {
@@ -332,13 +355,14 @@ namespace NetLibrary
                     break;
             }
 
-            OnRecvAction?.Invoke(flag,_convId, _buff,  len);
+            OnRecvAction?.Invoke(flag, _convId, _buff, len);
         }
 
         void HeartBeatProc(KcpClientInfo info)
         {
             info.hearttime = DateTimeOffset.Now.ToUnixTimeSeconds();
             //Console.WriteLine("心跳接收(" + info.conv + ") :" + info.ep.ToString());
+            OnLog?.Invoke(1, "心跳接收(" + info.conv + ") :" + info.ep.ToString());
             Send(info, new object[] { info.conv, info.linkrandomcode, (int)KcpFlag.HeartBeatBack });
         }
     }

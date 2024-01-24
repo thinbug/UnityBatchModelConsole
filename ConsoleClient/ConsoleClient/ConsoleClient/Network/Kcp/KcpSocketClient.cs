@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Markup.Localizer;
 
 
 //说明
@@ -30,7 +31,7 @@ namespace NetLibrary
         
 
         public static string ConnectKey = "ABCDEFG0123456789";
-        public int heartTime = 30;  //心跳周期,建议是Server的一半大小
+        public int heartTime = 5;  //心跳周期,建议是Server的一半大小
         public int relinkDelayTime = 10;    //如果重新连线，间隔多久，建议大于10秒
         public bool IsLocal = true;    //是否是内网，内外网络可能使用不同的Log。
         uint _conv = 0;
@@ -45,7 +46,7 @@ namespace NetLibrary
         Socket udpsocket;
         KcpClient kcpClient;
 
-
+        public bool relink = false; //是否断线重连
         long relinkTime;   //上次重连时间
         int connectStat = 0;   //0:创建，-1：请求分配conv,-2：连接服务端，并创建kcp。，1：连接完成 , -100:发生其他问题
         
@@ -67,14 +68,16 @@ namespace NetLibrary
             var remote = new IPEndPoint(IPAddress.Parse(remoteIp), remotePort);
             udpsocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             udpsocket.Blocking = false;
-            uint IOC_IN = 0x80000000;
-            uint IOC_VENDOR = 0x18000000;
-            uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
-            udpsocket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+            //uint IOC_IN = 0x80000000;
+            //uint IOC_VENDOR = 0x18000000;
+            //uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+            //udpsocket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
             udpsocket.Connect(remote);
 
             //kcpClient = new KcpClient();
             //kcpClient.Create(this, 1);
+
+            Link();
 
             BeginUpdate();
         }
@@ -88,6 +91,8 @@ namespace NetLibrary
                 Console.WriteLine("数据可能错误:" + _convId + "," + _conv + ",len:" + len);
                 return;
             }
+            if (udpsocket == null)
+                return;
             udpsocket.Send(_buff, 0, len, SocketFlags.None);
             //Console.WriteLine("client output:" + len);
             //Console.WriteLine("client socket发送:" + Encoding.UTF8.GetString(_buff, 0, len));
@@ -112,6 +117,8 @@ namespace NetLibrary
                         kcpClient.Update();
                     }
 
+                    if (udpsocket == null)
+                        break;
 
                     if (udpsocket.Available == 0)
                     {
@@ -125,7 +132,15 @@ namespace NetLibrary
                     //    Console.WriteLine("SocketError:" + errorCode.ToString());
                     //    Clear();
                     //}
-                    int cnt = udpsocket.Receive(buff, (int)SocketFlags.None);//,out SocketError errorCode);
+                    int cnt = 0;
+                    try
+                    {
+                        cnt = udpsocket.Receive(buff, (int)SocketFlags.None);//,out SocketError errorCode);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                    }
                     //if (errorCode != SocketError.Success)
                     //{
                     //    Console.WriteLine("SocketError:" + errorCode.ToString());
@@ -164,7 +179,13 @@ namespace NetLibrary
             });
         }
 
-        void Clear()
+        public void Close()
+        {
+            udpsocket.Close();
+            udpsocket.Dispose();
+            udpsocket = null;
+        }
+        void ClearKcp()
         {
             connectStat = 0;
             relinkTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -177,7 +198,22 @@ namespace NetLibrary
                 kcpClient = null;
             }
         }
-        
+
+        public void Link()
+        {
+            long nowTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            if (nowTime - relinkTime < relinkDelayTime * 1000)
+                return;
+            relinkTime = nowTime;
+            connectStat = -1;
+            byte[] buff0 = StructConverter.Pack(new object[] { (int)0, (int)KcpFlag.ConnectRequest, ConnectKey }, true, out string head);
+            udpsocket.Send(buff0, 0, buff0.Length, SocketFlags.None);
+            //Console.WriteLine("发送第一次握手数据:" + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length+","+ head);
+            if (IsLocal)
+                OnLog?.Invoke(1, "Kcp开始连接 : " + remoteIp + "(" + remotePort + ") " + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length + "," + head + ".\n");
+
+        }
+
         //处理连接
         void CheckSocketLinkStat()
         {
@@ -186,17 +222,9 @@ namespace NetLibrary
             {
                 case 0://发送第一次握手数据
                     //然后通知客户端conv编号再次链接
-                    nowTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                    if (nowTime - relinkTime < relinkDelayTime * 1000)
-                        return;
-                    relinkTime = nowTime;
-                    connectStat = -1;
-                    byte[] buff0 = StructConverter.Pack(new object[] { (int)0, (int)KcpFlag.ConnectRequest, ConnectKey },true,out string head);
-                    udpsocket.Send(buff0, 0, buff0.Length, SocketFlags.None);
-                    //Console.WriteLine("发送第一次握手数据:" + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length+","+ head);
-                    if (IsLocal)
-                        OnLog?.Invoke(1, "Kcp开始连接 : " + remoteIp+"("+remotePort+") " + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length + "," + head +".\n");
-
+                    if (!relink)
+                        break;
+                    Link();
                     break;
                 case -1:
                     nowTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -227,7 +255,7 @@ namespace NetLibrary
                     //Console.WriteLine("好久没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack));
                     if(IsLocal)
                         OnLog?.Invoke(2, "好久没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack)+ "\n");
-                    Clear();
+                    ClearKcp();
                     return;
                 }
                 lasthearttime = now;
@@ -243,17 +271,17 @@ namespace NetLibrary
             lasthearttimeBack = DateTimeOffset.Now.ToUnixTimeSeconds();
             //Console.WriteLine("接收到服务端心跳回复...");
             if (IsLocal)
-                OnLog?.Invoke(1, "接收到服务端心跳回复..\n");
+                OnLog?.Invoke(1, "接收到服务端心跳回复..");
 
         }
 
         void ConnetOK()
         {
-            lasthearttimeBack = 0;
+            lasthearttimeBack = DateTimeOffset.Now.ToUnixTimeSeconds();
             connectStat = 1;
             nexthearttime = DateTimeOffset.Now.ToUnixTimeSeconds() + heartTime;
             if (IsLocal)
-                OnLog?.Invoke(1,"成功连接到 [" + _conv + "] : " + remoteIp + "(" + remotePort + ") \n");
+                OnLog?.Invoke(1,"成功连接到 [" + _conv + "] : " + remoteIp + "(" + remotePort + ") ");
 
         }
 

@@ -32,13 +32,12 @@ namespace ConsoleClient
             this.Title = appName + " - " + ver;
 
             KcpSocketClient kcpSocketClient = new KcpSocketClient();
-            kcpSocketClient.Create("127.0.0.1", 27100);
+            kcpSocketClient.Create("192.168.3.76", 27100);
             kcpSocketClient.OnRecvAction += OnClientRecvSocket;
             kcpSocketClient.OnLog += OnKcpLog;
             _= ShowConsoleLog();
             
-            logList.Add(new LogInfo() { type = 1, log = "<color=#6780AB>找不到缓存资源,jvgPictureLoader下载CDN资源:</color>" });
-            logList.Add(new LogInfo() { type = 1, log = "<Span Foreground=\"#FF0000\">not expect</Span>" });
+            //logList.Add(new LogInfo() { type = 1, log = "<color=#6780AB>找不到缓存资源,jvgPictureLoader下载CDN资源:</color>" });
         }
 
         #region 网络程序Log
