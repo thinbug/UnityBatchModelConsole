@@ -113,5 +113,11 @@ namespace ConsoleClient
             //Fun.LogOutputColor(tbConsole, str2);
             //Fun.LogOutputColor(tbConsole, str3);
         }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            ServerLink slWin = new ServerLink();
+            slWin.ShowDialog();
+        }
     }
 }

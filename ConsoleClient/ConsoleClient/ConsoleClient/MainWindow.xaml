@@ -8,13 +8,24 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="38"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
-            <FlowDocumentScrollViewer Grid.Row="0">
+        <Menu  Grid.Row="0" Name="menuMain" VerticalContentAlignment="Center" FontSize="16">
+            <MenuItem Header="菜单" >
+                <MenuItem Header="连接" Click="MenuItem_Click"/>
+            </MenuItem>
+            
+            <MenuItem Header="关于" >
+                <MenuItem Header="关于" />
+            </MenuItem>
+        </Menu>
+   
+        <FlowDocumentScrollViewer Grid.Row="1">
             <FlowDocument x:Name="tbConsole" Background="#FFC2C2C2" PagePadding="5">
                 <Paragraph LineHeight="0.01" >
                     <Run Foreground="Blue">Hello</Run>
@@ -31,7 +42,7 @@
             </FlowDocument>
         </FlowDocumentScrollViewer>
            
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
