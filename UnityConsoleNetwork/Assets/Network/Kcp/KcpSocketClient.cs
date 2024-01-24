@@ -1,10 +1,6 @@
 ﻿
-using NetLibrary;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
+
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -140,6 +136,9 @@ namespace NetLibrary
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex.ToString());
+                        if (IsLocal)
+                            OnLog?.Invoke(3, remoteIp + "(" + remotePort + ") " + ex.ToString());
+
                     }
                     //if (errorCode != SocketError.Success)
                     //{
@@ -181,6 +180,7 @@ namespace NetLibrary
 
         public void Close()
         {
+            ClearKcp();
             udpsocket.Close();
             udpsocket.Dispose();
             udpsocket = null;
@@ -193,10 +193,11 @@ namespace NetLibrary
             {
                 kcpClient.Destory();
                 if (IsLocal)
-                    OnLog?.Invoke(2, "链接销毁 : " + remoteIp + "(" + remotePort + ") .\n");
+                    OnLog?.Invoke(2, "Kcp断开 : " + remoteIp + "(" + remotePort + ") .");
 
                 kcpClient = null;
             }
+
         }
 
         public void Link()
@@ -210,7 +211,7 @@ namespace NetLibrary
             udpsocket.Send(buff0, 0, buff0.Length, SocketFlags.None);
             //Console.WriteLine("发送第一次握手数据:" + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length+","+ head);
             if (IsLocal)
-                OnLog?.Invoke(1, "Kcp开始连接 : " + remoteIp + "(" + remotePort + ") " + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length + "," + head + ".\n");
+                OnLog?.Invoke(1, "Kcp开始连接 : " + remoteIp + "(" + remotePort + ") ");// + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length + "," + head + ".\n");
 
         }
 
@@ -254,7 +255,7 @@ namespace NetLibrary
                     //如果收到的心跳周期超过1个周期，那么可能掉线了。
                     //Console.WriteLine("好久没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack));
                     if (IsLocal)
-                        OnLog?.Invoke(2, "好久没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack) + "\n");
+                        OnLog?.Invoke(2, "没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack) + "\n");
                     ClearKcp();
                     return;
                 }
@@ -281,7 +282,7 @@ namespace NetLibrary
             connectStat = 1;
             nexthearttime = DateTimeOffset.Now.ToUnixTimeSeconds() + heartTime;
             if (IsLocal)
-                OnLog?.Invoke(1, "成功连接到 [" + _conv + "] : " + remoteIp + "(" + remotePort + ") ");
+                OnLog?.Invoke(2, "成功连接到 [" + _conv + "] : " + remoteIp + "(" + remotePort + ") ");
 
         }
 
