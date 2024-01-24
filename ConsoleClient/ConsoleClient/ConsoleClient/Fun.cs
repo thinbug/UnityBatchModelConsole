@@ -33,12 +33,27 @@ namespace ConsoleClient
 
         public static void LogOutputColor(FlowDocument fd,LogType lt,string source)
         {
+            BrushConverter brushConverter = new BrushConverter();
+            Brush defaultBrush ;
+            switch (lt)
+            { 
+                case LogType.Log:
+                default:
+                    defaultBrush = (Brush)brushConverter.ConvertFromString("#FFFFFF");
+                    break;
+                case LogType.Warn:
+                    defaultBrush = (Brush)brushConverter.ConvertFromString("#0000FF");
+                    break;
+                case LogType.Error:
+                    defaultBrush = (Brush)brushConverter.ConvertFromString("#FF0000");
+                    break;
+            }
+            
             //正则1：只匹配整个
             //Regex reg = new Regex("\\<color=#.*?\\>.*?\\</color\\>", RegexOptions.IgnoreCase);
             //正则2：匹配Group , 不支持嵌套颜色输出
             Regex reg = new Regex("\\<color=(?<color>.+?)\\>(?<txt>.*?)\\</color\\>", RegexOptions.IgnoreCase);
 
-            BrushConverter brushConverter = new BrushConverter();
             Paragraph p = new Paragraph { LineHeight=0.1 };//keepwithnext是没空行
             
 
@@ -49,6 +64,7 @@ namespace ConsoleClient
                 //如果没有任何匹配，直接添加显示。
                 Run run = new Run();
                 run.Text = source;
+                run.Foreground = defaultBrush;
                 p.Inlines.Add(run);
             }
             else
@@ -63,6 +79,7 @@ namespace ConsoleClient
                         //说明这里有其他字符
                         Run runInsert = new Run();
                         runInsert.Text = source.Substring(nowIndex, match.Index - nowIndex);
+                        runInsert.Foreground = defaultBrush;
                         p.Inlines.Add(runInsert);
                     }
                     nowIndex = match.Index + match.Length;
@@ -81,6 +98,7 @@ namespace ConsoleClient
                     //说明末尾还有字符串
                     Run runInsert = new Run();
                     runInsert.Text = source.Substring(nowIndex);
+                    runInsert.Foreground = defaultBrush;
                     p.Inlines.Add(runInsert);
                 }
             }

@@ -24,6 +24,7 @@ namespace ConsoleClient
         public string appName = "服务器控制台";
 
         List<LogInfo> logList;
+        KcpSocketClient kcpSocketClient;
         public MainWindow()
         {
             logList = new List<LogInfo>();
@@ -31,13 +32,23 @@ namespace ConsoleClient
             string ver = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
             this.Title = appName + " - " + ver;
 
-            KcpSocketClient kcpSocketClient = new KcpSocketClient();
-            kcpSocketClient.Create("192.168.3.76", 27100);
-            kcpSocketClient.OnRecvAction += OnClientRecvSocket;
-            kcpSocketClient.OnLog += OnKcpLog;
+            
             _= ShowConsoleLog();
             
             //logList.Add(new LogInfo() { type = 1, log = "<color=#6780AB>找不到缓存资源,jvgPictureLoader下载CDN资源:</color>" });
+        }
+
+        public void Link(string ip, int port)
+        {
+            if (kcpSocketClient != null)
+            {
+                kcpSocketClient.Close();
+                kcpSocketClient = null;
+            }
+            kcpSocketClient = new KcpSocketClient();
+            kcpSocketClient.OnRecvAction += OnClientRecvSocket;
+            kcpSocketClient.OnLog += OnKcpLog;
+            kcpSocketClient.Create(ip, port);
         }
 
         #region 网络程序Log
@@ -100,7 +111,7 @@ namespace ConsoleClient
         }
         #endregion
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void BtnSend_Click(object sender, RoutedEventArgs e)
         {
             string str0 = $"<color=#FF0000>用例1: </color>";
             string str1 = $"<color=#FF0000>用例1: </color>第1个提示。";
@@ -118,6 +129,13 @@ namespace ConsoleClient
         {
             ServerLink slWin = new ServerLink();
             slWin.ShowDialog();
+        }
+
+       
+        //清空列表
+        private void btnClear_Click(object sender, RoutedEventArgs e)
+        {
+            tbConsole.Blocks.Clear();
         }
     }
 }

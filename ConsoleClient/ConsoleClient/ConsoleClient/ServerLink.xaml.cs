@@ -100,10 +100,14 @@ namespace ConsoleClient
             {
                 lbServers.Items.RemoveAt(idx);
             }
-
-            serversList.Add(new ServerData { name = savestr , time = DateTimeOffset.Now.ToUnixTimeSeconds() });
+            ServerData sd = new ServerData { name = savestr, time = DateTimeOffset.Now.ToUnixTimeSeconds() };
+            serversList.Add(sd);
             
             SaveList();
+
+            MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
+            mainWindow.Link(tbIp.Text, int.Parse(tbPort.Text));
+            Close();
         }
 
         private void lbServers_Selected(object sender, RoutedEventArgs e)
@@ -144,8 +148,6 @@ namespace ConsoleClient
                     DelServer(index);
                     break;
                 case "MenuItemSvrDelAll":
-                    if (index == -1)
-                        return;
                     DelAllServer();
                     break;
             }

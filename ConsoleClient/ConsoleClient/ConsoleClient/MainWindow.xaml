@@ -5,12 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ConsoleClient"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="25"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="38"></RowDefinition>
+            <RowDefinition Height="25"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
@@ -51,10 +52,17 @@
             <Button Grid.Column="0" Width="40" FontSize="22" >⬆</Button>
             <TextBox  Grid.Column="1" FontSize="22" VerticalContentAlignment="Center"></TextBox>
             <DockPanel Grid.Column="2" Background="#FFF0F0F0" HorizontalAlignment="Right">
-                <Button Width="80" FontSize="22" Click="Button_Click">发送</Button>
-                <Button Width="80" FontSize="22">....</Button>
-                <Button Width="80" FontSize="22">清空</Button>
+                <Button x:Name="btnSend"  Width="80" FontSize="22" Click="BtnSend_Click">发送</Button>
+                <Button x:Name="btnSend2" Width="80" FontSize="22">....</Button>
+                <Button x:Name="btnClear" Width="80" FontSize="22" Click="btnClear_Click" >清空</Button>
             </DockPanel>
         </Grid>
+        <DockPanel Grid.Row="3">
+            <StatusBar DockPanel.Dock="Bottom">
+                <StatusBarItem>
+                    <TextBlock Name="tbStat" Text="..." />
+                </StatusBarItem>
+            </StatusBar>
+        </DockPanel>
     </Grid>
 </Window>

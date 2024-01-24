@@ -21,7 +21,7 @@ public class ServerMain : MonoBehaviour
         kcpserver.OnLog += OnKcpLog;
         //_ = ShowConsoleLog();
 
-        Debug.Log("开始");
+        Debug.Log("开始:"+ 27100);
     }
 
     private void EditorApplication_quitting()
@@ -68,9 +68,4 @@ public class ServerMain : MonoBehaviour
     }
 
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

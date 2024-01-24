@@ -20,8 +20,8 @@
             </ListBox.ContextMenu>
         </ListBox>
         <StackPanel Grid.Row="1" Orientation="Horizontal">
-            <TextBox x:Name="tbIp" Width="200" VerticalContentAlignment="Center">Ip</TextBox>
-            <TextBox x:Name="tbPort"  Width="50" VerticalContentAlignment="Center">Port</TextBox>
+            <TextBox x:Name="tbIp" Width="200" VerticalContentAlignment="Center">127.0.0.1</TextBox>
+            <TextBox x:Name="tbPort"  Width="50" VerticalContentAlignment="Center">27100</TextBox>
             <Button x:Name="btnLink" Width=" 60" Click="btnLink_Click">连接</Button>
         </StackPanel>
     </Grid>
