@@ -6,7 +6,12 @@
         xmlns:local="clr-namespace:ConsoleClient"
         mc:Ignorable="d"
         Title="MainWindow" WindowStartupLocation="CenterScreen">
-    <Grid>
+    <!--Window.Resources >
+        <ImageBrush  x:Key="wifi0" ImageSource="/pic/wifi_0.png"></ImageBrush>
+        <ImageBrush  x:Key="wifi1" ImageSource="/pic/wifi_1.png"></ImageBrush>
+        <ImageBrush  x:Key="wifi2" ImageSource="/pic/wifi_2.png"></ImageBrush>
+    </Window.Resources -->
+    <Grid >
         <Grid.RowDefinitions>
             <RowDefinition Height="25"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
@@ -20,12 +25,12 @@
             <MenuItem Header="菜单" >
                 <MenuItem Header="连接" Click="MenuItem_Click"/>
             </MenuItem>
-            
+
             <MenuItem Header="关于" >
                 <MenuItem Header="关于" />
             </MenuItem>
         </Menu>
-   
+
         <FlowDocumentScrollViewer Grid.Row="1">
             <FlowDocument x:Name="tbConsole" Background="#FFC2C2C2" PagePadding="5">
                 <Paragraph LineHeight="0.01" >
@@ -42,7 +47,7 @@
                 </Paragraph>
             </FlowDocument>
         </FlowDocumentScrollViewer>
-           
+
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"></ColumnDefinition>
@@ -57,8 +62,11 @@
                 <Button x:Name="btnClear" Width="80" FontSize="22" Click="btnClear_Click" >清空</Button>
             </DockPanel>
         </Grid>
-        <DockPanel Grid.Row="3">
+        <DockPanel Grid.Row="3" >
             <StatusBar DockPanel.Dock="Bottom">
+                <StatusBarItem>
+                    <Image x:Name="imgNetstat" />
+                </StatusBarItem>
                 <StatusBarItem>
                     <TextBlock Name="tbStat" Text="..." />
                 </StatusBarItem>

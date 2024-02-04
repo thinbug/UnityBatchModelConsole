@@ -54,6 +54,9 @@ namespace NetLibrary
 
         public Action<int, string> OnLog;
 
+        public Action OnConnetOK;
+        public Action OnConnetClose;
+
         public void Create(string _ip,int _port)
         {
             remoteIp = _ip;
@@ -138,6 +141,7 @@ namespace NetLibrary
                         Console.WriteLine(ex.ToString());
                         if (IsLocal)
                             OnLog?.Invoke(3, remoteIp + "(" + remotePort + ") "+ ex.ToString());
+                        ClearKcp();
 
                     }
                     //if (errorCode != SocketError.Success)
@@ -192,12 +196,13 @@ namespace NetLibrary
             if (kcpClient != null)
             {
                 kcpClient.Destory();
-                if (IsLocal)
-                    OnLog?.Invoke(2, "Kcp断开 : " + remoteIp + "(" + remotePort + ") .");
 
                 kcpClient = null;
             }
+            if (IsLocal)
+                OnLog?.Invoke(2, "Kcp断开 : " + remoteIp + "(" + remotePort + ") .");
 
+            OnConnetClose?.Invoke();
         }
 
         public void Link()
@@ -278,6 +283,7 @@ namespace NetLibrary
 
         void ConnetOK()
         {
+            OnConnetOK?.Invoke();
             lasthearttimeBack = DateTimeOffset.Now.ToUnixTimeSeconds();
             connectStat = 1;
             nexthearttime = DateTimeOffset.Now.ToUnixTimeSeconds() + heartTime;

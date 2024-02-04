@@ -4,13 +4,17 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 
 namespace ConsoleClient
@@ -32,8 +36,8 @@ namespace ConsoleClient
             string ver = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
             this.Title = appName + " - " + ver;
 
-            
-            _= ShowConsoleLog();
+            //imgNetstat.Source = new BitmapImage(new Uri("pack://application:,,,/pic/wifi_0.png"));
+            _ = ShowConsoleLog();
             
             //logList.Add(new LogInfo() { type = 1, log = "<color=#6780AB>找不到缓存资源,jvgPictureLoader下载CDN资源:</color>" });
         }
@@ -48,7 +52,11 @@ namespace ConsoleClient
             kcpSocketClient = new KcpSocketClient();
             kcpSocketClient.OnRecvAction += OnClientRecvSocket;
             kcpSocketClient.OnLog += OnKcpLog;
+            kcpSocketClient.OnConnetOK += OnConnetOK;
+            kcpSocketClient.OnConnetClose += OnConnetClose;
             kcpSocketClient.Create(ip, port);
+            imgNetstat.Source = new BitmapImage(new Uri("pack://application:,,,/pic/wifi_0.png"));
+
         }
 
         #region 网络程序Log
@@ -73,6 +81,19 @@ namespace ConsoleClient
         void OnKcpLog(int _type,string _outstr)
         {
             logList.Add(new LogInfo() { type = _type, log = _outstr });
+        }
+        void OnConnetOK()
+        {
+            imgNetstat.Dispatcher.Invoke(new Action(()=>{
+                imgNetstat.Source = new BitmapImage(new Uri("pack://application:,,,/pic/wifi_1.png"));
+            }));
+            
+        }
+        void OnConnetClose()
+        {
+            imgNetstat.Dispatcher.Invoke(new Action(() => {
+                imgNetstat.Source = new BitmapImage(new Uri("pack://application:,,,/pic/wifi_2.png"));
+            }));
         }
 
         async Task ShowConsoleLog()

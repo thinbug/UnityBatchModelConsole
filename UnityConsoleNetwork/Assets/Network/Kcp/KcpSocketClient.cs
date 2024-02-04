@@ -24,7 +24,7 @@ namespace NetLibrary
 {
     public class KcpSocketClient
     {
-
+        
 
         public static string ConnectKey = "ABCDEFG0123456789";
         public int heartTime = 5;  //心跳周期,建议是Server的一半大小
@@ -37,24 +37,27 @@ namespace NetLibrary
 
         //EndPoint ipep = new IPEndPoint(0, 0);
         byte[] buff = new byte[1400];
-
-
+        
+       
         Socket udpsocket;
         KcpClient kcpClient;
 
         public bool relink = false; //是否断线重连
         long relinkTime;   //上次重连时间
         int connectStat = 0;   //0:创建，-1：请求分配conv,-2：连接服务端，并创建kcp。，1：连接完成 , -100:发生其他问题
-
+        
         long nexthearttime;
         long lasthearttime;
         long lasthearttimeBack;
 
-        public Action<KcpFlag, byte[], int> OnRecvAction;
+        public Action<KcpFlag,byte[], int> OnRecvAction;
 
         public Action<int, string> OnLog;
 
-        public void Create(string _ip, int _port)
+        public Action OnConnetOK;
+        public Action OnConnetClose;
+
+        public void Create(string _ip,int _port)
         {
             remoteIp = _ip;
             remotePort = _port;
@@ -78,7 +81,7 @@ namespace NetLibrary
             BeginUpdate();
         }
 
-
+        
 
         public void output(uint _convId, byte[] _buff, int len)
         {
@@ -95,7 +98,7 @@ namespace NetLibrary
         }
 
 
-
+        
 
 
         async void BeginUpdate()
@@ -137,7 +140,8 @@ namespace NetLibrary
                     {
                         Console.WriteLine(ex.ToString());
                         if (IsLocal)
-                            OnLog?.Invoke(3, remoteIp + "(" + remotePort + ") " + ex.ToString());
+                            OnLog?.Invoke(3, remoteIp + "(" + remotePort + ") "+ ex.ToString());
+                        ClearKcp();
 
                     }
                     //if (errorCode != SocketError.Success)
@@ -162,7 +166,7 @@ namespace NetLibrary
                         //走到这里的都是有conv的数据
                         if (kcpClient != null)
                             kcpClient.kcp_input(buff, cnt);
-
+                        
                     }
                     else
                     {
@@ -192,12 +196,13 @@ namespace NetLibrary
             if (kcpClient != null)
             {
                 kcpClient.Destory();
-                if (IsLocal)
-                    OnLog?.Invoke(2, "Kcp断开 : " + remoteIp + "(" + remotePort + ") .");
 
                 kcpClient = null;
             }
+            if (IsLocal)
+                OnLog?.Invoke(2, "Kcp断开 : " + remoteIp + "(" + remotePort + ") .");
 
+            OnConnetClose?.Invoke();
         }
 
         public void Link()
@@ -245,27 +250,27 @@ namespace NetLibrary
         //心跳检测
         void CheckHeartBeat()
         {
-
+            
             long now = DateTimeOffset.Now.ToUnixTimeSeconds();
-
+            
             if (now > nexthearttime)
             {
                 if (lasthearttimeBack > 0 && lasthearttime - lasthearttimeBack > heartTime)
                 {
                     //如果收到的心跳周期超过1个周期，那么可能掉线了。
                     //Console.WriteLine("好久没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack));
-                    if (IsLocal)
-                        OnLog?.Invoke(2, "没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack) + "\n");
+                    if(IsLocal)
+                        OnLog?.Invoke(2, "没接收到心跳回复，关闭连接:" + (lasthearttime - lasthearttimeBack)+ "\n");
                     ClearKcp();
                     return;
                 }
                 lasthearttime = now;
                 nexthearttime = now + heartTime;
-
+                
                 //Console.WriteLine("发送心跳:" + lasthearttime + ","+DateTime.Now.ToString());
-                Send(new object[] { _conv, linkcode, (int)KcpFlag.HeartBeatRequest });
+                Send(new object[] { _conv,linkcode, (int)KcpFlag.HeartBeatRequest });
             }
-
+            
         }
         void GetHeartBack()
         {
@@ -278,15 +283,16 @@ namespace NetLibrary
 
         void ConnetOK()
         {
+            OnConnetOK?.Invoke();
             lasthearttimeBack = DateTimeOffset.Now.ToUnixTimeSeconds();
             connectStat = 1;
             nexthearttime = DateTimeOffset.Now.ToUnixTimeSeconds() + heartTime;
             if (IsLocal)
-                OnLog?.Invoke(2, "成功连接到 [" + _conv + "] : " + remoteIp + "(" + remotePort + ") ");
+                OnLog?.Invoke(2,"成功连接到 [" + _conv + "] : " + remoteIp + "(" + remotePort + ") ");
 
         }
 
-        void ProcessUdp(byte[] _buff, int buffsize)
+        void ProcessUdp(byte[] _buff,int buffsize)
         {
             int index = 4; //udp数据第一位需要。
             //KcpFlag flagtype = (KcpFlag)BitConverter.ToInt32(_buff, offset);
@@ -295,17 +301,17 @@ namespace NetLibrary
             //为0，表示是非KCP数据,然后获取第二位，看想做什么
             switch (flagtype)
             {
-
+                
                 case KcpFlag.AllowConnectConv:
                     if (connectStat != -1)
                         break;
                     //接收到服务端发来的编号。
                     //{ 0(空),KcpFlag.AllowConnectConv(连接类型),一个随机数}
-                    object[] parms = StructConverter.Unpack(StructConverter.EndianHead + "Ii", _buff, index, buffsize - index);
+                    object[] parms = StructConverter.Unpack(StructConverter.EndianHead +"Ii", _buff, index, buffsize - index);
                     uint get_conv = (uint)parms[0];
-
+                    
                     linkcode = (int)parms[1];
-
+                    
                     //Console.WriteLine("linkcode:" + linkcode);
                     //再次给服务端发送，需要服务端验证自己。
 
@@ -368,7 +374,7 @@ namespace NetLibrary
                     break;
             }
 
-            OnRecvAction?.Invoke(flag, _buff, len);
+            OnRecvAction?.Invoke(flag,_buff, len);
         }
 
     }
