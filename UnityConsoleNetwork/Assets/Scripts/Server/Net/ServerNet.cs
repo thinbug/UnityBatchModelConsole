@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class ServerMain : MonoBehaviour
+public class ServerNet : MonoBehaviour
 {
-    public static ServerMain inst;
+    public static ServerNet inst;
     KcpSocketServer kcpserver;
     private void Awake()
     {
@@ -16,12 +16,12 @@ public class ServerMain : MonoBehaviour
 #endif
         inst = this;
         kcpserver = new KcpSocketServer();
-        kcpserver.Create(27100);
+        kcpserver.Create(50000);
         kcpserver.OnRecvAction += OnClientRecvSocket;
         kcpserver.OnLog += OnKcpLog;
         //_ = ShowConsoleLog();
 
-        Debug.Log("开始:"+ 27100);
+        Debug.Log("开始:"+ 50000);
     }
 
     private void EditorApplication_quitting()

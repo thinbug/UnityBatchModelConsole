@@ -30,7 +30,7 @@ namespace WindowsConsoleMine
                     sOut = logHead + condition +"\n" + stackTrace;
                     break;
             }
-            ServerMain.inst.SendLog((int)type, sOut);
+            ConsoleMain.inst.SendLog((int)type, sOut);
             Console.WriteLine(sOut);
         }
 
