@@ -62,16 +62,23 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Server\ButtonGUI.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\KcpServer.cs" />
+    <Compile Include="Assets\Scripts\Server\DBase\SQLiteHelper.cs" />
+    <Compile Include="Assets\Scripts\ClientRoot.cs" />
     <Compile Include="Assets\Scripts\Server\User\UserData.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\KCP.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\KcpSocketClient.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\KcpSocketServer.cs" />
     <Compile Include="Assets\Scripts\Server\Net\ServerNet.cs" />
+    <Compile Include="Assets\Scripts\Server\DBase\DBMain.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\NetFunction.cs" />
+    <Compile Include="Assets\Scripts\Server\User\UserDataManager.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\IKCPSEG.cs" />
+    <Compile Include="Assets\Scripts\GameSocketFlag.cs" />
+    <Compile Include="Assets\Scripts\Server\Net\ServerMsg.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\KcpClient.cs" />
     <Compile Include="Assets\Scripts\Server\Console\ConsoleMain.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\StructConverter.cs" />
+    <Compile Include="Assets\Scripts\PlayerSocket.cs" />
     <Compile Include="Assets\Scripts\Server\Console\ConsoleDebugLogCallback.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -412,6 +419,10 @@
     </Reference>
     <Reference Include="ReportGeneratorMerged">
       <HintPath>Library\PackageCache\com.unity.testtools.codecoverage@1.2.4\lib\ReportGenerator\ReportGeneratorMerged.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Data.Sqlite">
+      <HintPath>Assets\Plugins\Sqlite\Mono.Data.Sqlite.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.VisualScripting.Antlr3.Runtime">

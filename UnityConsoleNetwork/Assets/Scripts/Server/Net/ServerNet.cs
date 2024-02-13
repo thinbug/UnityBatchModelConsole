@@ -11,6 +11,7 @@ public class ServerNet : MonoBehaviour
     KcpSocketServer kcpserver;
     private void Awake()
     {
+        gameObject.AddComponent<ServerMsg>();
 #if UNITY_EDITOR
         EditorApplication.quitting += EditorApplication_quitting;
 #endif
@@ -49,9 +50,12 @@ public class ServerNet : MonoBehaviour
         Debug.Log(arg2);
     }
 
-    private void OnClientRecvSocket(KcpFlag flat, uint _convId, byte[] _buff, int len)
+    private void OnClientRecvSocket(KcpFlag flag, uint _convId, byte[] _buff, int len)
     {
-        
+        if (flag == KcpFlag.MSG)
+        {
+            ServerMsg.inst.Msg(_convId, _buff, len);
+        }
     }
 
     public void SendLog(int t, string txt)

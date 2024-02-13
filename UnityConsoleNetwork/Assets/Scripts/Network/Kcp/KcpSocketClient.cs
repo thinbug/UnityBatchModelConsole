@@ -344,6 +344,17 @@ namespace NetLibrary
             //Console.WriteLine("Kcp(" + _conv + ") 发送数据," + "size:" + buffsize);
         }
 
+        //给服务端发送业务数据
+        public void ToServer(GameSocketFlag flag, params object[] p)
+        {
+            object[] s1 = new object[] { _conv, linkcode, (int)KcpFlag.MSG, (int)flag };
+            object[] s2 = new object[s1.Length + p.Length];
+            s1.CopyTo(s2, 0);
+            if(p!= null)
+                p.CopyTo(s2, s1.Length);
+            Send(s2);
+        }
+
         //真正的接收数据
         public void KcpRecvData(byte[] _buff, int len)
         {
