@@ -5,11 +5,22 @@ using UnityEngine;
 
 public class ClientRoot : MonoBehaviour
 {
+    public static ClientRoot inst;
+    private void Awake()
+    {
+        inst = this;
+    }
     // Start is called before the first frame update
     void Start()
     {
         gameObject.AddComponent<PlayerSocket>();
-        PlayerSocket.inst.kcp.OnConnetOK += OnConnetOK;
+        //PlayerSocket.inst.kcp.OnConnetOK += OnConnetOK;
+        UIRoot.inst.OpenUI();
+    }
+
+    public void LoginServer(string ip, int port)
+    {
+        PlayerSocket.inst.Login(ip, port);
     }
 
     private void OnConnetOK()

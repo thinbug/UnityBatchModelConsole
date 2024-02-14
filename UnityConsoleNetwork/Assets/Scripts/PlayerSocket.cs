@@ -18,18 +18,18 @@ public class PlayerSocket : MonoBehaviour
     {
         inst = this;
     }
-    private void Start()
-    {
-        Login();
-    }
+    //private void Start()
+    //{
+    //    Login();
+    //}
 
-    public void Login()
+    public void Login(string ip,int port)
     {
 #if UNITY_EDITOR
         EditorApplication.quitting += EditorApplication_quitting;
 #endif
         kcp = new KcpSocketClient();
-        kcp.Create("127.0.0.1", 50000);
+        kcp.Create(ip, port);
         kcp.OnRecvAction += OnClientRecvSocket;
         kcp.OnLog += OnKcpLog;
 
