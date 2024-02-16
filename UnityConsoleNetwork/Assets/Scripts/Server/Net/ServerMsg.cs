@@ -7,9 +7,12 @@ using UnityEngine;
 public class ServerMsg : MonoBehaviour
 {
     public static ServerMsg inst;
+
+    Dictionary<string, uint> Users;
     private void Awake()
     {
         inst = this;
+        Users = new Dictionary<string, uint>();
     }
 
     public void Msg(uint _convId, byte[] _buff, int len)
@@ -19,7 +22,15 @@ public class ServerMsg : MonoBehaviour
         switch (flag)
         {
             case GameSocketFlag.GET_USER_DATA:
+                GetUserData(_convId, _buff, len);
                 break;
         }
+    }
+
+    //玩家登陆,用户和密码用逗号分割
+    void GetUserData(uint _convId, byte[] _buff, int len)
+    {
+        string sOut = StructConverter.UnPackString(true, _buff, 16, len - 16);
+        UserManager.inst.UserLogin(sOut);
     }
 }

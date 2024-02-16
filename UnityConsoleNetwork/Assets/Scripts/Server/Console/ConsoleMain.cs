@@ -4,13 +4,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using WindowsConsoleMine;
 
+//使用控制台连接服务端的网络接口
 public class ConsoleMain : MonoBehaviour
 {
     public static ConsoleMain inst;
     KcpSocketServer kcpserver;
     private void Awake()
     {
+        gameObject.AddComponent<ConsoleDebugLogCallback>();
+
 #if UNITY_EDITOR
         EditorApplication.quitting += EditorApplication_quitting;
 #endif

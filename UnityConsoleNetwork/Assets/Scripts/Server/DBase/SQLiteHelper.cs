@@ -52,6 +52,18 @@ public class SQLiteHelper
         dataReader = dbCommand.ExecuteReader();
         return dataReader;
     }
+    /// <summary>
+    /// 执行SQL命令
+    /// </summary>
+    /// <returns>The query.</returns>
+    /// <param name="queryString">SQL命令字符串</param>
+    public int ExecuteNoQuery(string queryString)
+    {
+        dbCommand = dbConnection.CreateCommand();
+        dbCommand.CommandText = queryString;
+        return dbCommand.ExecuteNonQuery();
+      
+    }
 
     /// <summary>
     /// 关闭数据库连接
@@ -114,6 +126,34 @@ public class SQLiteHelper
         }
         queryString += " )";
         return ExecuteQuery(queryString);
+    }
+
+    public int Insert(string tableName, string[] fields, string[] values)
+    {
+        string queryString = "INSERT INTO " + tableName;
+        for (int i = 0; i < fields.Length; i++)
+        {
+            if (i == 0)
+                queryString += " (";
+            else
+                queryString += ",";
+            queryString += fields[i];
+            if (i == fields.Length -1)
+                queryString += ")";
+        }
+        queryString += " VALUES ";
+        for (int i = 0; i < values.Length; i++)
+        {
+            if (i == 0)
+                queryString += " (";
+            else
+                queryString += ",";
+            queryString += values[i];
+            if (i == values.Length - 1)
+                queryString += ")";
+        }
+        //Debug.Log(queryString);
+        return ExecuteNoQuery(queryString);
     }
 
     /// <summary>

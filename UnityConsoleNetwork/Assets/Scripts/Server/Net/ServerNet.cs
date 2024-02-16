@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+//服务端的游戏业务网络
 public class ServerNet : MonoBehaviour
 {
     public static ServerNet inst;
@@ -32,12 +33,13 @@ public class ServerNet : MonoBehaviour
 
     void Clear()
     {
-        Debug.Log("结束");
+        Debug.Log("ServerNet结束");
         if (kcpserver != null)
             kcpserver.Close();
+
     }
 
-    
+
     private void OnApplicationQuit()
     {
         Clear();

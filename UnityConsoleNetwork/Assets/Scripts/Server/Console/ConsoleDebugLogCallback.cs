@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 namespace WindowsConsoleMine
 {
+    //服务器的控制台接口
     public class ConsoleDebugLogCallback : MonoBehaviour
     {
         string timeFormat = "yyyy-MM-dd HH:mm:ss";

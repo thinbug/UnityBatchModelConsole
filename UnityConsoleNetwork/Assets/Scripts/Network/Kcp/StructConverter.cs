@@ -247,6 +247,23 @@ namespace NetLibrary
             return outputList.ToArray();
         }
 
+        public static string UnPackString(bool isLittle, byte[] bytes, int index, int length)
+        {
+            bool endianFlip = false;
+            if (isLittle)
+            {
+                if (BitConverter.IsLittleEndian == false) endianFlip = true;
+            }
+            else
+            {
+                if (BitConverter.IsLittleEndian == true) endianFlip = true;
+            }
+            int byteArrayPosition = index;
+            if (endianFlip == true) Array.Reverse(bytes, byteArrayPosition, length);
+
+            return System.Text.Encoding.UTF8.GetString(bytes, byteArrayPosition, length);
+        }
+
         /// <summary>
         /// Convert an array of objects to a byte array, along with a string that can be used with Unpack.
         /// </summary>
@@ -289,6 +306,7 @@ namespace NetLibrary
         public static byte[] Pack(object[] items)
         {
             string dummy = "";
+            //默认小端发送
             return Pack(items, true, out dummy);
         }
 

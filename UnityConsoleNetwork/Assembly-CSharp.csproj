@@ -60,9 +60,9 @@
     <Analyzer Include="D:\UnityFiles\2022.3.14f1c1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Server\ButtonGUI.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\KcpServer.cs" />
     <Compile Include="Assets\Scripts\Server\DBase\SQLiteHelper.cs" />
+    <Compile Include="Assets\Scripts\Server\ServerRoot.cs" />
     <Compile Include="Assets\Scripts\ClientRoot.cs" />
     <Compile Include="Assets\Scripts\Server\User\UserData.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\KCP.cs" />
@@ -71,20 +71,20 @@
     <Compile Include="Assets\Scripts\Network\Kcp\KcpSocketServer.cs" />
     <Compile Include="Assets\Scripts\Server\Net\ServerNet.cs" />
     <Compile Include="Assets\Scripts\Server\DBase\DBMain.cs" />
+    <Compile Include="Assets\Scripts\Server\User\UserManager.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\NetFunction.cs" />
-    <Compile Include="Assets\Scripts\Server\User\UserDataManager.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\IKCPSEG.cs" />
     <Compile Include="Assets\Scripts\GameSocketFlag.cs" />
     <Compile Include="Assets\Scripts\Server\Net\ServerMsg.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\KcpClient.cs" />
     <Compile Include="Assets\Scripts\Server\Console\ConsoleMain.cs" />
     <Compile Include="Assets\Scripts\Network\Kcp\StructConverter.cs" />
+    <Compile Include="Assets\Scripts\ButtonGUI.cs" />
     <Compile Include="Assets\Scripts\PlayerSocket.cs" />
     <Compile Include="Assets\Scripts\Server\Console\ConsoleDebugLogCallback.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Scripts\Network\Kcp\libikcp64.dll" />
-    <None Include="Assets\Res\txt.txt" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

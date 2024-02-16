@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine.tvOS;
 
 //说明
 
@@ -89,11 +90,26 @@ namespace NetLibrary
 
         public void Close()
         {
+            ClearKcp();
             udpsocket.Close();
             udpsocket.Dispose();
             udpsocket = null;
         }
+        void ClearKcp()
+        {
+            for (int i = 0; i < kcpClientDict.Count; i++)
+            {
+                KeyValuePair<uint, KcpClientInfo> kv = kcpClientDict.ElementAt(i);
+                KcpClientInfo kcpClient = kv.Value;
+                if (kcpClient != null)
+                {
+                    kcpClient.kcp.Destory();
+                    kcpClient = null;
+                }
+            }
+            kcpClientDict.Clear();
 
+        }
 
         public void output(uint _convId, byte[] _buff, int len)
         {

@@ -1,43 +1,47 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 
 public class ClientRoot : MonoBehaviour
 {
     public static ClientRoot inst;
+
+    public string userId;
+    public string userPwd;
     private void Awake()
     {
         inst = this;
     }
-    // Start is called before the first frame update
+    
     void Start()
     {
         gameObject.AddComponent<PlayerSocket>();
-        //PlayerSocket.inst.kcp.OnConnetOK += OnConnetOK;
         UIRoot.inst.OpenUI();
     }
 
-    public void LoginServer(string ip, int port)
+    public void LoginServer(string ip, int port,string _userId, string _userPwd)
     {
+        userId = _userId;
+        userPwd = _userPwd;
         PlayerSocket.inst.Login(ip, port);
+        PlayerSocket.inst.kcp.OnConnetOK += OnConnetOK;
+        PlayerSocket.inst.kcp.OnConnetClose += OnConnetClose;
     }
 
     private void OnConnetOK()
     {
         //连接成功后进行数据请求
-        GetUserData();
+        Debug.Log("OnConnetOK");
+        UserLogin();
+    }
+    private void OnConnetClose()
+    {
+        Debug.Log("OnConnetClose");
     }
 
-    private void GetUserData()
+    private void UserLogin()
     {
         //用户默认用户名在本地就是local
-        PlayerSocket.inst.ToServer(GameSocketFlag.GET_USER_DATA,"local");
+        PlayerSocket.inst.ToServer(GameSocketFlag.GET_USER_DATA, userId+","+userPwd);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

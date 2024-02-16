@@ -3,9 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//游戏数据库接口
 public class DBMain : MonoBehaviour
 {
+    public static DBMain inst;
     SQLiteHelper sql;
+    private void Awake()
+    {
+        inst = this;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -83,4 +89,29 @@ public class DBMain : MonoBehaviour
         sql.CloseConnection();
     }
 
+    public bool Login(string username,string pwd)
+    {
+        SqliteDataReader reader;
+        //读取数据表中Age>=25的全部记录的ID和Name
+        reader = sql.ReadTable("TAccount", new string[] { "accountID", "pwd" }, new string[] { "accountID" }, new string[] { "=" }, new string[] { "'"+ username + "'" });
+
+        bool had = reader.Read();
+        if (had)
+        {
+            //读取ID
+            string dbid = reader.GetString(reader.GetOrdinal("accountID"));
+            //读取Name
+            string dbpwd = reader.GetString(reader.GetOrdinal("pwd"));
+
+            if (dbpwd != pwd)
+                return false;
+        }
+        else
+        {
+            int insertno = sql.Insert("TAccount", new string[] { "accountID", "pwd" }, new string[] { "'" + username+ "'" , "'" + pwd+"'" });
+            if (insertno < 1)
+                return false;
+        }
+        return true;
+    }
 }

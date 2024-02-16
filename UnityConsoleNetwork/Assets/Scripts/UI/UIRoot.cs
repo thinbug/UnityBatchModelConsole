@@ -13,6 +13,8 @@ public class UIRoot : MonoBehaviour
     [SerializeField] Transform serverLogin;
     [SerializeField] InputField txtIp;
     [SerializeField] InputField txtPort;
+    [SerializeField] InputField txtUser;
+    [SerializeField] InputField txtPwd;
     [SerializeField] Button btnLogin;
 
     [SerializeField] Transform Avatars;
@@ -44,7 +46,7 @@ public class UIRoot : MonoBehaviour
 
     private void OnLogin()
     {
-        ClientRoot.inst.LoginServer(txtIp.text, int.Parse(txtPort.text));
+        ClientRoot.inst.LoginServer(txtIp.text, int.Parse(txtPort.text),txtUser.text,txtPwd.text);
     }
 
     private void OnOpenServerUI()

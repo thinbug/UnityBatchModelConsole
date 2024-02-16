@@ -105,7 +105,11 @@ namespace NetLibrary
                 }
             }
         }
-
+        public void Destory()
+        {
+            ikcp_release(kcp);
+            //Console.WriteLine("Kcp Client Destory .");
+        }
         //public void Send(string txt)
         //{
         //    var buff = Encoding.UTF8.GetBytes(txt);
