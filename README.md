@@ -7,7 +7,7 @@
 目录:
 UnityConsole:
 Unity的Batchmode模式运行的程序无窗口，这个项目是给他加上控制台窗口，并且显示gb2132中文。
-
+这个模式不好用,参考用例2通过网络同步.
 ![image](https://github.com/thinbug/UnityBatchModelConsole/assets/25097168/a7dd823e-18fc-4294-b80c-e0a51093985a)
 
 
@@ -16,3 +16,4 @@ Unity的Batchmode模式运行的程序无窗口，这个项目是给他加上控
 UnityConsoleNetwork : Unity的服务端
 ConsoleClient:Unity的客户端Console工具
 
+![1](https://github.com/thinbug/UnityBatchModelConsole/assets/25097168/95368f86-d39e-45b0-b890-08ab73d671b4)
