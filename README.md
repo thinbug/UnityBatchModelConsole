@@ -15,5 +15,6 @@ Unity的Batchmode模式运行的程序无窗口，这个项目是给他加上控
 目录:
 UnityConsoleNetwork : Unity的服务端
 ConsoleClient:Unity的客户端Console工具
+控制台的DLL是x64的,运行时候选择x64
 
 ![1](https://github.com/thinbug/UnityBatchModelConsole/assets/25097168/95368f86-d39e-45b0-b890-08ab73d671b4)
