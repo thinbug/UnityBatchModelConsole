@@ -1,4 +1,5 @@
-﻿using NetLibrary;
+﻿using ConsoleClient.Network;
+using NetLibrary;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -34,6 +35,7 @@ namespace NetLibrary
 
             public KcpServer kcp;   //对应的客户端kcp
             public EndPoint ep;   //客户端的ep
+            public ProtocolClient protocolClient;
         }
 
         public static string ConnectKey = "ABCDEFG0123456789";
@@ -255,13 +257,14 @@ namespace NetLibrary
                         kinfo.conv = newConv;
                         kinfo.createtime = DateTimeOffset.Now.ToUnixTimeSeconds();
                         kinfo.ep = ep;
+                        kinfo.protocolClient = new ProtocolClient();
                         kinfo.hearttime = kinfo.createtime;
                         kinfo.linkrandomcode = new Random().Next(10000, int.MaxValue);
                         kcpClientLinking.Add(newConv, kinfo);
                         //Console.WriteLine("linkcode:" + kinfo.linkrandomcode);
                         //然后通知客户端conv编号再次链接
 
-                        byte[] buff0 = StructConverter.Pack(new object[] { (int)0, (int)KcpFlag.AllowConnectConv, newConv, kinfo.linkrandomcode });
+                        byte[] buff0 = StructConverter.Pack(new object[] { (uint)0, (int)KcpFlag.AllowConnectConv, newConv, kinfo.linkrandomcode });
                         udpsocket.SendTo(buff0, 0, buff0.Length, SocketFlags.None, ipep);
 
                         //Console.WriteLine("接收到客户端第一次请求连接:" + ipep.ToString());

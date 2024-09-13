@@ -1,4 +1,6 @@
 ﻿
+using ConsoleClient.Network;
+
 using System;
 
 using System.Net;
@@ -6,6 +8,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Markup;
 
 
 
@@ -57,12 +60,15 @@ namespace NetLibrary
         public Action OnConnetOK;
         public Action OnConnetClose;
 
+        ProtocolClient protocolClient;
+
         public void Create(string _ip,int _port)
         {
             remoteIp = _ip;
             remotePort = _port;
             connectStat = 0;
             lasthearttimeBack = 0;
+            
 
             var remote = new IPEndPoint(IPAddress.Parse(remoteIp), remotePort);
             udpsocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -212,7 +218,7 @@ namespace NetLibrary
                 return;
             relinkTime = nowTime;
             connectStat = -1;
-            byte[] buff0 = StructConverter.Pack(new object[] { (int)0, (int)KcpFlag.ConnectRequest, ConnectKey }, true, out string head);
+            byte[] buff0 = StructConverter.Pack(new object[] { (uint)0, (int)KcpFlag.ConnectRequest, ConnectKey }, true, out string head);
             udpsocket.Send(buff0, 0, buff0.Length, SocketFlags.None);
             //Console.WriteLine("发送第一次握手数据:" + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length+","+ head);
             if (IsLocal)
@@ -286,6 +292,7 @@ namespace NetLibrary
             OnConnetOK?.Invoke();
             lasthearttimeBack = DateTimeOffset.Now.ToUnixTimeSeconds();
             connectStat = 1;
+            protocolClient = new ProtocolClient();
             nexthearttime = DateTimeOffset.Now.ToUnixTimeSeconds() + heartTime;
             if (IsLocal)
                 OnLog?.Invoke(2,"成功连接到 [" + _conv + "] : " + remoteIp + "(" + remotePort + ") ");
@@ -315,7 +322,7 @@ namespace NetLibrary
                     //Console.WriteLine("linkcode:" + linkcode);
                     //再次给服务端发送，需要服务端验证自己。
 
-                    byte[] buff0 = StructConverter.Pack(new object[] { (int)0, (int)KcpFlag.ConnectKcpRequest, get_conv, linkcode }, true, out string head);
+                    byte[] buff0 = StructConverter.Pack(new object[] { (uint)0, (int)KcpFlag.ConnectKcpRequest, get_conv, linkcode }, true, out string head);
                     udpsocket.Send(buff0, 0, buff0.Length, SocketFlags.None);
                     //Console.WriteLine("发送第2次握手数据:" + Encoding.UTF8.GetString(buff0) + ",len:" + buff0.Length+","+ head);
 
@@ -330,11 +337,15 @@ namespace NetLibrary
 
         }
 
+        
+
         void Send(object[] parm)
         {
             byte[] buff0 = StructConverter.Pack(parm);
             Send(buff0, buff0.Length);
         }
+
+
 
         //KCP发送数据
         void Send(byte[] buff, int buffsize)
@@ -342,6 +353,30 @@ namespace NetLibrary
             kcpClient.SendByte(buff, buffsize);
 
             //Console.WriteLine("Kcp(" + _conv + ") 发送数据," + "size:" + buffsize);
+        }
+
+        //发送一个结构
+        public void SendProtocol(int protocolNo, ProtocolBase data)
+        {
+            object[] head = new object[] { _conv, linkcode, (int)KcpFlag.Protocol };
+
+            byte[] buffHead = StructConverter.Pack(head);
+            byte[] bytes = ProtocolBase.ConvertToBytes(protocolNo, data);
+            byte[] bsend = new byte[buffHead.Length + bytes.Length];
+            buffHead.CopyTo(bsend, 0);
+            bytes.CopyTo(bsend, buffHead.Length);
+            Send(bsend, bsend.Length);
+        }
+
+        void ReadProtocol(byte[] bytes)
+        {
+            bool endianFlip = !BitConverter.IsLittleEndian;
+            int bytePosition = 12;  //因为头里包含了conv，密码，和消息类型，占用12个头部，第4个是协议编号
+            if (endianFlip == true) Array.Reverse(bytes, bytePosition, 4);
+            int protocolNo = (int)BitConverter.ToInt32(bytes, bytePosition);
+
+            protocolClient.ProtocolProcess(bytes, bytePosition ,protocolNo );
+            
         }
 
         //真正的接收数据
@@ -372,10 +407,16 @@ namespace NetLibrary
                 case KcpFlag.HeartBeatBack:
                     GetHeartBack();
                     break;
+                case KcpFlag.Protocol:
+                    
+                    ReadProtocol(_buff);
+                    break;
             }
 
             OnRecvAction?.Invoke(flag,_buff, len);
         }
+
+
 
     }
 }

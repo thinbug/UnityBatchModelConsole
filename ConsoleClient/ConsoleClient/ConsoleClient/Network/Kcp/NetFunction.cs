@@ -15,7 +15,10 @@ namespace NetLibrary
         AllowConnectConv = 20,      //服务端给客户端发送的conv回执，准备连接
         AllowConnectOK = 21,        //服务端通过kcp发送连接成功，通知可以断
         HeartBeatBack = 31,         //服务端给客户返回心跳消息
+
         MSG = 51,         //正常消息
+
+        Protocol = 0xFF,  //网络协议结构体消息
 
     }
 

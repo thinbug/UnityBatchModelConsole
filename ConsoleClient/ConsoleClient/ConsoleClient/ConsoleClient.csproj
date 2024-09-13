@@ -162,6 +162,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Network\Protocols\ProtocolBase.cs" />
+    <Compile Include="Network\Protocols\ProtocolPackage.cs" />
+    <Compile Include="Network\Protocols\ProtocolClient.cs" />
     <Compile Include="ServerLink.xaml.cs">
       <DependentUpon>ServerLink.xaml</DependentUpon>
     </Compile>

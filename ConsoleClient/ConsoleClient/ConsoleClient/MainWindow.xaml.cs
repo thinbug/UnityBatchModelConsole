@@ -1,4 +1,6 @@
 ﻿
+using ConsoleClient.Network;
+
 using NetLibrary;
 using System;
 using System.Collections.Generic;
@@ -141,9 +143,18 @@ namespace ConsoleClient
             //str3 = "<div>  <h3>这是一个在 div 元素中的标题。</h3></div>";
             
             Fun.LogOutputColor(tbConsole,LogType.Log, str2);
-            
+
             //Fun.LogOutputColor(tbConsole, str2);
             //Fun.LogOutputColor(tbConsole, str3);
+
+            //byte[] xx = System.Text.Encoding.UTF8.GetBytes((string)null);
+
+            ProtocolPlayerMove npm = new ProtocolPlayerMove();
+            byte[] bytes = ProtocolBase.ConvertToBytes(1001,npm);
+            Console.WriteLine("二进制长度为 : "+bytes.Length);
+            ProtocolPlayerMove data = new ProtocolPlayerMove();
+            ProtocolBase.ConvertToObject(bytes,4,data);
+            Console.WriteLine("转对象完成  " + data.ToString());
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
