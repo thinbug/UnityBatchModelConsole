@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using static ConsoleClient.MainWindow;
+
 
 namespace ConsoleClient.Network
 {
@@ -30,7 +30,7 @@ namespace ConsoleClient.Network
                 {
                     Console.WriteLine(fields[i].Name+"的值为空.");
                 }
-                Console.WriteLine(fields[i].Name);
+                //Console.WriteLine(fields[i].Name);
             }
         }
 
@@ -98,7 +98,7 @@ namespace ConsoleClient.Network
                     bytePosition += valueSize;
                 }
             }
-            Console.WriteLine("对象转换完成");
+            //Console.WriteLine("对象转换完成");
         }
 
 

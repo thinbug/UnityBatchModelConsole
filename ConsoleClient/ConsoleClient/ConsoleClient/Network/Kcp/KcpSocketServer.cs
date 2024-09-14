@@ -53,13 +53,13 @@ namespace NetLibrary
         int localPort = 11001;
 
         EndPoint ipep = new IPEndPoint(0, 0);
-        byte[] buff = new byte[1400];
+        byte[] buff = new byte[8192];
 
         Socket udpsocket;
         public Dictionary<uint, KcpClientInfo> kcpClientDict;
         Dictionary<uint, KcpClientInfo> kcpClientLinking;
 
-        public Action<KcpFlag, uint, byte[], int> OnRecvAction;
+        public Action<KcpClientInfo, KcpFlag, uint, byte[], int> OnRecvAction;
         public Action<int, string> OnLog;
 
 
@@ -76,10 +76,10 @@ namespace NetLibrary
             var localipep = new IPEndPoint(ip, localPort);
             udpsocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             udpsocket.Blocking = false;
-            //uint IOC_IN = 0x80000000;
-            //uint IOC_VENDOR = 0x18000000;
-            //uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
-            //udpsocket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+            uint IOC_IN = 0x80000000;
+            uint IOC_VENDOR = 0x18000000;
+            uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+            udpsocket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
 
             udpsocket.Bind(localipep);
 
@@ -145,14 +145,15 @@ namespace NetLibrary
 
                         if (nowhearttime - item.Value.hearttime > TimeOutHeart)
                         {
-                            Console.WriteLine("超时了需要删除:" + item.Value.conv);
+                            Console.WriteLine("心跳超时了需要删除:" + item.Value.conv);
                             kcpClientDict.Remove(item.Key);
                             break;
                         }
                     }
                     list.Dispose();
 
-                    await Task.Delay(10);
+                    await Task.FromResult(0);
+                    //await Task.Delay(10);
                     if (udpsocket == null)
                         break;
                     if (udpsocket.Available == 0)
@@ -240,6 +241,7 @@ namespace NetLibrary
 
             KcpFlag flagtype = (KcpFlag)StructConverter.ToInt32_Little2Local_Endian(_buff, index);
             index += 4;
+            //Console.WriteLine("ProcessUdp:" + ep.ToString()+ ", flagtype:" + flagtype);
             //为0，表示是非KCP数据,然后获取第二位，看想做什么
             object[] parms;
             switch (flagtype)
@@ -265,9 +267,9 @@ namespace NetLibrary
                         //然后通知客户端conv编号再次链接
 
                         byte[] buff0 = StructConverter.Pack(new object[] { (uint)0, (int)KcpFlag.AllowConnectConv, newConv, kinfo.linkrandomcode });
-                        udpsocket.SendTo(buff0, 0, buff0.Length, SocketFlags.None, ipep);
+                        udpsocket.SendTo(buff0, 0, buff0.Length, SocketFlags.None, ep);
 
-                        //Console.WriteLine("接收到客户端第一次请求连接:" + ipep.ToString());
+                        //Console.WriteLine($"接收到客户端{newConv}第一次请求连接:" + ep.ToString());
                         //客户端直接可以使用kcp来链接了，第一个编号必须还是0
                     }
                     break;
@@ -286,13 +288,13 @@ namespace NetLibrary
                     if (getlinkone)
                     {
                         //验证IP和端口
-                        if (get_code == linkinfo.linkrandomcode && linkinfo.ep.Equals(ipep))
+                        if (get_code == linkinfo.linkrandomcode && linkinfo.ep.Equals(ep))
                         {
                             //成功握手了。
                             //把连接数据放入正式数据
-                            //Console.WriteLine("同意客户端请求连接:" + ipep.ToString());
+                            //Console.WriteLine($"同意客户端{get_conv}请求连接:" + ep.ToString());
 
-                            linkinfo.ep = ipep;
+                            linkinfo.ep = ep;
                             linkinfo.kcp = new KcpServer();
                             linkinfo.kcp.Create(this, linkinfo.conv);
                             linkinfo.hearttime = DateTimeOffset.Now.ToUnixTimeSeconds();
@@ -333,7 +335,8 @@ namespace NetLibrary
 
         public void KcpRecvData(uint _convId, byte[] _buff, int len)
         {
-            //Console.WriteLine(_convId + "-server rec:" + Encoding.UTF8.GetString(_buff, 0, len));
+            //if(len == 12)
+            //Console.WriteLine($"[{DateTime.Now.ToString()}] "+_convId + " -server rec:" + len);
             //首先获取到conv和消息类型
             object[] parms = StructConverter.Unpack(StructConverter.EndianHead + "Iii", _buff, 0, 12);
             uint con_id = (uint)parms[0];
@@ -355,17 +358,17 @@ namespace NetLibrary
             {
                 case KcpFlag.HeartBeatRequest:
                     HeartBeatProc(linkinfo);
-                    break;
+                    return;
             }
 
-            OnRecvAction?.Invoke(flag, _convId, _buff, len);
+            OnRecvAction?.Invoke(linkinfo, flag, _convId, _buff, len);
         }
 
         void HeartBeatProc(KcpClientInfo info)
         {
             info.hearttime = DateTimeOffset.Now.ToUnixTimeSeconds();
             //Console.WriteLine("心跳接收(" + info.conv + ") :" + info.ep.ToString());
-            OnLog?.Invoke(1, "心跳接收(" + info.conv + ") :" + info.ep.ToString());
+            OnLog?.Invoke(1, $"[{DateTime.Now.ToString()}]心跳接收(" + info.conv + ") :" + info.ep.ToString());
             Send(info, new object[] { info.conv, info.linkrandomcode, (int)KcpFlag.HeartBeatBack });
         }
     }

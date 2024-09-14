@@ -29,17 +29,18 @@ namespace ConsoleClient.Network
         /// <param name="bytes"></param>
         /// <param name="bytePosition"></param>
         /// <param name="protocolNo"></param>
-        public void ProtocolProcess(byte[] bytes, int bytePosition ,int protocolNo)
+        public ProtocolBase ProtocolProcess(byte[] bytes, int bytePosition ,int protocolNo)
         {
             if (!protocolDict.ContainsKey(protocolNo))
             {
                 Console.WriteLine("没有这个网络协议。");
-                return;
+                return null;
             }
             ProtocolBase pr = protocolDict[protocolNo];
             ProtocolBase.ConvertToObject(bytes, bytePosition, pr);
-
-            Console.WriteLine($"接收到网络协议{protocolNo}数据。");
+            
+            //Console.WriteLine($"接收到网络协议{protocolNo}数据。");
+            return pr;
         }
     }
 }
