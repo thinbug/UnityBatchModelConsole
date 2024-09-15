@@ -13,6 +13,7 @@ public class ServerNet : MonoBehaviour
     private void Awake()
     {
         gameObject.AddComponent<ServerMsg>();
+        
 #if UNITY_EDITOR
         EditorApplication.quitting += EditorApplication_quitting;
 #endif
